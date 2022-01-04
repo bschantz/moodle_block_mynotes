@@ -1,6 +1,6 @@
-Mynotes Block
+JbcNotes Block
 --------------
-A simpler mynotes system that integrates as moodle block to save user's notes
+A simpler jbcnotes system that integrates as moodle block to save user's notes
 from different areas such as site, course, modules, etc.
 
 This is a free plugin for Moodle that help to preserve uesr's notes.
@@ -31,12 +31,12 @@ Requirements
 Installation
 ------------
 
-Within the ZIP file is a folder named mynotes, copy this folder into
+Within the ZIP file is a folder named jbcnotes, copy this folder into
 your Moodle blocks folder (e.g /var/moodle/htdocs/blocks/ ). Once the folder
 has been copied into your blocks folder, login to Moodle as admin and it should
 detect the new block and install it.
 
-Note that if you download the ZIP from Github the mynotes folder is called
-'moodle-block_mynotes' and needs to be renamed after extraction to 'mynotes'.
+Note that if you download the ZIP from Github the jbcnotes folder is called
+'moodle-block_jbcnotes' and needs to be renamed after extraction to 'jbcnotes'.
 
 Once installed this block, automatically added to page while installing. There is no need to add to every page.

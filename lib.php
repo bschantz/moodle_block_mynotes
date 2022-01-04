@@ -15,16 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mynotes block helper functions and callbacks
+ * The jbcnotes block helper functions and callbacks
  *
- * @package    block_mynotes
+ * @package    block_jbcnotes
  * @author     Gautam Kumar Das<gautam.arg@gmail.com>
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 
-class block_mynotes_manager  {
+class block_jbcnotes_manager  {
 
     public $perpage = 5;
     private $config = null;
@@ -33,17 +33,17 @@ class block_mynotes_manager  {
      * Constructor.
      */
     public function __construct() {
-        $this->config = get_config('block_mynotes');
-        $this->perpage = $this->config->mynotesperpage;
+        $this->config = get_config('block_jbcnotes');
+        $this->perpage = $this->config->jbcnotesperpage;
     }
 
     /**
-     * Returns matched mynotes
+     * Returns matched notes
      *
      * @param  int $page
      * @return array
      */
-    public function get_mynotes($options) {
+    public function get_jbcnotes($options) {
         global $DB, $CFG, $USER, $OUTPUT;
 
         $page = (!isset($options->page) || !$options->page) ? 0 : $options->page;
@@ -64,15 +64,15 @@ class block_mynotes_manager  {
             $params['courseid'] = $options->courseid;            
         }
         $sql = "SELECT $ufields, 
-            m.id AS mynoteid, m.content AS ccontent, m.contextarea, m.format AS cformat, 
+            m.id AS mynoteid, m.content AS ccontent, m.contextarea, m.contextid, m.format AS cformat, 
             m.timecreated AS timecreated, c.fullname as coursename, m.courseid
-                  FROM {block_mynotes} m
+                  FROM {block_jbcnotes} m
                   JOIN {user} u ON u.id = m.userid
                   LEFT JOIN {course} c ON c.id = m.courseid
                  WHERE $where
               ORDER BY m.timecreated DESC"; 
         $strftime = get_string('strftimerecentfull', 'langconfig');
-        $mynotes = array();
+        $jbcnotes = array();
         $formatoptions = array('overflowdiv' => true);
         $start = (isset($options->limitfrom)) ? $options->limitfrom : $start;
         $rs = $DB->get_recordset_sql($sql, $params, $start, $perpage);
@@ -81,29 +81,35 @@ class block_mynotes_manager  {
             $c->id = $u->mynoteid;
             $c->userid = $u->id;
             if ($u->courseid != SITEID) {
-                $c->coursename = html_writer::link(course_get_url($u->courseid), $u->coursename);
+                $c->courselink = html_writer::link(course_get_url($u->courseid), $u->coursename);
+                if ($options->cm) {
+                    $cm_info = get_fast_modinfo($options->cm->id)->get_cm($options->cm->id);
+                    $c->modlink = html_writer::link($cm_info->url, $cm_info->name);
+                }
             } else {
-                $c->coursename = '';
+                $c->courselink = '';
+                $c->modlink = '';
             }
+
             $c->content = $u->ccontent;
             $c->contextarea = $u->contextarea;
             $c->format = $u->cformat;
             $c->timecreated = userdate($u->timecreated, $strftime);
             $c->content = format_text($c->content, $c->format, $formatoptions);
             $c->delete = true;
-            $mynotes[] = $c;
+            $jbcnotes[] = $c;
         }
         $rs->close();
-        return $mynotes;
+        return $jbcnotes;
     }
     
     /**
-     * Returns count of the mynotes in a table where all the given conditions met.
+     * Returns count of the jbcnotes in a table where all the given conditions met.
      *
      * @param object $options
      * @return int The count of records
      */
-    public function count_mynotes($options) {
+    public function count_jbcnotes($options) {
         global $DB, $USER;
         $params = array();
         $params['userid'] = $USER->id;
@@ -113,18 +119,18 @@ class block_mynotes_manager  {
         if (isset($options->courseid) && !empty($options->courseid)) {
             $params['courseid'] = $options->courseid;
         }
-        return $DB->count_records('block_mynotes', $params);
+        return $DB->count_records('block_jbcnotes', $params);
     }
 
     /*
-     * Returns paging bar for mynotes
+     * Returns paging bar for jbcnotes
      * 
      * @param object $options must contain properties(contextid, count, page, perpage)
      * @return html
      */
     public function get_pagination($options) {
         global $OUTPUT;
-        $baseurl = new moodle_url('/blocks/mynotes/mynotes_ajax.php', 
+        $baseurl = new moodle_url('/blocks/jbcnotes/jbcnotes_ajax.php', 
                 array(
                     'contextid' => $options->contextid)
                 );
@@ -148,7 +154,7 @@ class block_mynotes_manager  {
         $newnote->userid = $USER->id;
         $newnote->timecreated = time();
 
-        if ($cmtid = $DB->insert_record('block_mynotes', $newnote)) {
+        if ($cmtid = $DB->insert_record('block_jbcnotes', $newnote)) {
             $newnote->id = $cmtid;
             $newnote->content = format_text($newnote->content, $newnote->format, array('overflowdiv' => true));
             $newnote->timecreated = userdate($newnote->timecreated, get_string('strftimerecentfull', 'langconfig'));
@@ -163,16 +169,16 @@ class block_mynotes_manager  {
     }
 
     /*
-     * Find all available context areas which is used to store and retrieve mynotes.
+     * Find all available context areas which is used to store and retrieve jbcnotes.
      * 
      * @return array
      */
     public function get_available_contextareas() {
         return array(
-            'site' => get_string('site', 'block_mynotes'),
-            'course' => get_string('course', 'block_mynotes'),
-            'mod' => get_string('mod', 'block_mynotes'),
-            'user' => get_string('user', 'block_mynotes'),
+            'site' => get_string('site', 'block_jbcnotes'),
+            'course' => get_string('course', 'block_jbcnotes'),
+            'mod' => get_string('mod', 'block_jbcnotes'),
+            'user' => get_string('user', 'block_jbcnotes'),
         );
     }
     /*
@@ -223,18 +229,18 @@ class block_mynotes_manager  {
      */
     public function delete($mynoteid) {
         global $DB, $USER;
-        if (!$mynote = $DB->get_record('block_mynotes', array('id' => $mynoteid))) {
-            throw new mynotes_exception('deletefailed', 'block_mynotes');
+        if (!$mynote = $DB->get_record('block_jbcnotes', array('id' => $mynoteid))) {
+            throw new jbcnotes_exception('deletefailed', 'block_jbcnotes');
         }
         if ($USER->id != $mynote->userid) {
-            throw new mynotes_exception('nopermissiontodelete', 'block_mynotes');
+            throw new jbcnotes_exception('nopermissiontodelete', 'block_jbcnotes');
         }
-        return $DB->delete_records('block_mynotes', array('id' => $mynoteid));
+        return $DB->delete_records('block_jbcnotes', array('id' => $mynoteid));
     }
 }
 
 /**
- * Mynotes exception class
+ * Jbcnotes exception class
  */
-class mynotes_exception extends moodle_exception {
+class jbcnotes_exception extends moodle_exception {
 }

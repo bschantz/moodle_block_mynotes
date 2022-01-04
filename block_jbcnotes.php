@@ -15,26 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mynotes block
+ * The JBC Notes block
  *
- * @package    block_mynotes
+ * @package    block_jbcnotes
  * @author     Gautam Kumar Das<gautam.arg@gmail.com>
+ * @author     Brian Schantz<lastchance@gmail.com>
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/blocks/mynotes/lib.php');
+require_once($CFG->dirroot . '/blocks/jbcnotes/lib.php');
 
 /**
- * Mynotes block.
+ * Jbcnotes block.
  *
- * @package    block_mynotes
+ * @package    block_jbcnotes
  * 
  */
-class block_mynotes extends block_base {
+class block_jbcnotes extends block_base {
 
     public function init() {
-        $this->title = get_string('pluginname', 'block_mynotes');
+        $this->title = get_string('pluginname', 'block_jbcnotes');
     }
 
     public function has_config() {
@@ -87,12 +88,12 @@ class block_mynotes extends block_base {
         $this->content = new stdClass();
         $this->content->text = '';
         if ($PAGE->user_is_editing()) {
-            $this->content->text = '<div class="inline-mynotes-opener">'.get_string('showmynotes', 'block_mynotes').'</div>';
+            $this->content->text = '<div class="inline-jbcnotes-opener">'.get_string('showjbcnotes', 'block_jbcnotes').'</div>';
         }
         $this->content->footer = '';
         
         if ($jscount == 0) {
-            $this->block_mynotes_get_required_javascript();
+            $this->block_jbcnotes_get_required_javascript();
             $jscount++;
         }
         return $this->content;
@@ -101,39 +102,39 @@ class block_mynotes extends block_base {
     /*
      * load JS that requires into the page.
      */
-    private function block_mynotes_get_required_javascript() {
+    private function block_jbcnotes_get_required_javascript() {
         global $PAGE, $CFG; 
         list($context, $course, $cm) = get_context_info_array($PAGE->context->id);
-        $config = get_config('block_mynotes');
+        $config = get_config('block_jbcnotes');
         
-        $mm = new block_mynotes_manager();
+        $mm = new block_jbcnotes_manager();
         $currenttabindex = $mm->get_current_tab($context, $PAGE);
         $arguments = array( 'arg'=> array(
             'instanceid' => $this->instance->id,
             'editing' => ($PAGE->user_is_editing()),
-            'editingicon_pos' => ($PAGE->user_is_editing()) ? 'mynotes-pos-inline' : $config->icondisplayposition,
+            'editingicon_pos' => ($PAGE->user_is_editing()) ? 'jbcnotes-pos-inline' : $config->icondisplayposition,
             'maxallowedcharacters' => $config->characterlimit,
             'contextid' => $context->id,
-            'maxallowedcharacters_warning' => get_string('notmorethan', 'block_mynotes', $config->characterlimit),
+            'maxallowedcharacters_warning' => get_string('notmorethan', 'block_jbcnotes', $config->characterlimit),
             'contextareas' => $mm->get_available_contextareas(),
             'currenttabindex' => ($currenttabindex == null ? 'site' : $currenttabindex),
-            'perpage' => $config->mynotesperpage,
+            'perpage' => $config->jbcnotesperpage,
             ),
         );
-        $PAGE->requires->string_for_js('charactersleft', 'block_mynotes');
-        $PAGE->requires->string_for_js('notmorethan', 'block_mynotes');
-        $PAGE->requires->string_for_js('mynotes', 'block_mynotes');
-        $PAGE->requires->string_for_js('showmynotes', 'block_mynotes');
-        $PAGE->requires->string_for_js('savedsuccess', 'block_mynotes');
-        $PAGE->requires->string_for_js('save', 'block_mynotes');
-        $PAGE->requires->string_for_js('placeholdercontent', 'block_mynotes');
-        $PAGE->requires->string_for_js('deletemynotes', 'block_mynotes');
-        $PAGE->requires->string_for_js('mynotescount', 'block_mynotes');
-        $PAGE->requires->string_for_js('previouspage', 'block_mynotes');
-        $PAGE->requires->string_for_js('nextpage', 'block_mynotes');
-        $PAGE->requires->string_for_js('nothingtodisplay', 'block_mynotes');
-        $PAGE->requires->string_for_js('mynotessavedundertab', 'block_mynotes');
+        $PAGE->requires->string_for_js('charactersleft', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('notmorethan', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('jbcnotes', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('showjbcnotes', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('savedsuccess', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('save', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('placeholdercontent', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('deletejbcnotes', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('jbcnotescount', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('previouspage', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('nextpage', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('nothingtodisplay', 'block_jbcnotes');
+        $PAGE->requires->string_for_js('jbcnotessavedundertab', 'block_jbcnotes');
         $PAGE->requires->string_for_js('cancel', 'moodle');
-        $this->page->requires->js_call_amd('block_mynotes/mynotesblock', 'init', $arguments);
+        $this->page->requires->js_call_amd('block_jbcnotes/jbcnotesblock', 'init', $arguments);
     }
 }

@@ -17,14 +17,14 @@
 /**
  * Version details
  *
- * @package    block_mynotes
+ * @package    block_jbcnotes
  * @author     Gautam Kumar Das<gautam.arg@gmail.com>
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2018011200;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version   = 2022010400;        // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2015050500;        // Requires this Moodle version
-$plugin->component = 'block_mynotes'; // Full name of the plugin (used for diagnostics)
-$plugin->release   = 'V3.4 r1';
+$plugin->component = 'block_jbcnotes'; // Full name of the plugin (used for diagnostics)
+$plugin->release   = 'V3.5 r1';
 $plugin->maturity = MATURITY_STABLE;

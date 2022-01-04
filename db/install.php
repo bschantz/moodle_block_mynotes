@@ -17,16 +17,16 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Mynotes block installation.
+ * Jbcnotes block installation.
  *
- * @package    block_mynotes
+ * @package    block_jbcnotes
  */
 
-function xmldb_block_mynotes_install() {
+function xmldb_block_jbcnotes_install() {
     global $DB;
 
     $obj = new stdClass();
-    $obj->blockname = 'mynotes';
+    $obj->blockname = 'jbcnotes';
     $obj->parentcontextid = SITEID;
     $obj->showinsubcontexts = 1;
     $obj->pagetypepattern = '*';

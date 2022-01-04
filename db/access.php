@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Mynotes block caps.
+ * Jbcnotes block caps.
  *
- * @package    block_mynotes
+ * @package    block_jbcnotes
  * @author     Gautam Kumar Das<gautam.arg@gmail.com>
  */
 
@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
-    'block/mynotes:myaddinstance' => array(
+    'block/jbcnotes:myaddinstance' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array(
@@ -35,7 +35,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/my:manageblocks'
     ),
 
-    'block/mynotes:addinstance' => array(
+    'block/jbcnotes:addinstance' => array(
         'riskbitmask' => RISK_SPAM | RISK_XSS,
 
         'captype' => 'write',
