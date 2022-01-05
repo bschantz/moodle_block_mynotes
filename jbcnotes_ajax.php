@@ -34,9 +34,6 @@ $page      = optional_param('page', 0, PARAM_INT);
 
 list($context, $course, $cm) = get_context_info_array($contextid);
 
-error_log('$cm:');
-error_log(var_export($cm, true));
-
 if ( $contextid == SYSCONTEXTID || $context->contextlevel == CONTEXT_USER) {
     $course = get_site();
 }
@@ -65,10 +62,10 @@ $config = get_config('block_jbcnotes');
 
 echo $OUTPUT->header(); //...send headers
 // process ajax request
+$manager = new block_jbcnotes_manager();
 switch ($action) {
     case 'add':
         $content   = optional_param('content',   '', PARAM_RAW);
-        $manager = new block_jbcnotes_manager();
         if ($note = $manager->addmynote($context, $contextarea, $course, $content)) {
             $options = new stdClass();
             $options->page = $page;        
@@ -82,23 +79,22 @@ switch ($action) {
         } else {
             echo json_encode(array('error' => 'Unable to add note'));
         }
-        die();
         break;
     case 'get':
-        $manager = new block_jbcnotes_manager();
         $options = new stdClass();
         $options->page = $page;
         $options->contextarea = $contextarea;
-        $options->cm = $cm;
+        if ($course) {
+            $options->course = (int)$course->id;
+        }
+        $options->courseid = $course->id;
         $count = $manager->count_jbcnotes($options);
         $notes = $manager->get_jbcnotes($options);
         echo json_encode(array('notes' => $notes, 'count' => $count));
-        die();
         break;
     case 'delete':
         $noteid = required_param('noteid', PARAM_INT);
         $limitfrom = optional_param('lastnotecounts', 0, PARAM_INT);
-        $manager = new block_jbcnotes_manager();
         if ($manager->delete($noteid)) {
             $options = new stdClass();   
             $options->page = $page;
@@ -110,7 +106,6 @@ switch ($action) {
             $notes = $manager->get_jbcnotes($options);
             echo json_encode(array('notes' => $notes, 'count' => $count, 'noteid' => $noteid));
         }
-        die();
         break;
 }
 die();

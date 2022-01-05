@@ -74,7 +74,12 @@ class block_jbcnotes extends block_base {
             return '';      // Never useful unless you are logged in as real users
         }
         
-        if (!in_array($PAGE->context->contextlevel, array(CONTEXT_COURSE, CONTEXT_SYSTEM, CONTEXT_MODULE, CONTEXT_USER))) {
+        if (
+            !in_array(
+                $PAGE->context->contextlevel,
+                array(CONTEXT_COURSE/*, CONTEXT_SYSTEM*/, CONTEXT_MODULE/*, CONTEXT_USER*/))
+            || ($PAGE->context->contextlevel == CONTEXT_COURSE && $PAGE->course->id == SITEID)
+        ) {
             return '';
         }
         

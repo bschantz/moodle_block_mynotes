@@ -82,8 +82,9 @@ class block_jbcnotes_manager  {
             $c->userid = $u->id;
             if ($u->courseid != SITEID) {
                 $c->courselink = html_writer::link(course_get_url($u->courseid), $u->coursename);
-                if ($options->cm) {
-                    $cm_info = get_fast_modinfo($options->cm->id)->get_cm($options->cm->id);
+                if ($u->contextarea === 'mod') {
+                    list(, , $cm) = get_context_info_array($u->contextid);
+                    $cm_info = get_fast_modinfo($cm->id)->get_cm($cm->id);
                     $c->modlink = html_writer::link($cm_info->url, $cm_info->name);
                 }
             } else {
@@ -175,10 +176,10 @@ class block_jbcnotes_manager  {
      */
     public function get_available_contextareas() {
         return array(
-            'site' => get_string('site', 'block_jbcnotes'),
+            //'site' => get_string('site', 'block_jbcnotes'),
             'course' => get_string('course', 'block_jbcnotes'),
             'mod' => get_string('mod', 'block_jbcnotes'),
-            'user' => get_string('user', 'block_jbcnotes'),
+            //'user' => get_string('user', 'block_jbcnotes'),
         );
     }
     /*

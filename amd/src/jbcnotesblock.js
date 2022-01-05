@@ -20,50 +20,48 @@
  * @package    block_jbcnotes
  * @author     Gautam Kumar Das<gautam.arg@gmail.com>
  */
-define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], function ($, Y, str, config, notification) {
-    window.console.log('config: ', config);
-    window.console.debug('notif:', notification);
-    var CONFIG;
-    var NODES = {
+define([
+    'jquery',
+    'core/yui',
+    'core/str',
+    'core/config',
+    'core/notification',
+], function($, Y, str, config, notification) {
+    let CONFIG;
+    const NODES = {
         DELETE_ICON: '<span class="delete">&#x274C;</span>',
     };
-    var SELECTORS = {
+    const SELECTORS = {
         JBCNOTES_BASE: '#jbcnotes_base',
         JBCNOTES_OPENER: '.jbcnotes-opener',
         JBCNOTES_LISTS: '.jbcnotes_list',
     };
-    var CSS = {
+    const CSS = {
         JBCNOTES_BASE: 'jbcnotes_base',
         JBCNOTES_OPENER: 'jbcnotes-opener',
         JBCNOTES_LISTS: 'jbcnotes_list',
     };
-    var panel = null;
-    var initnotes = null;
-    var strdeletenote = M.util.get_string('deletejbcnotes', 'block_jbcnotes');
-
-    // var getJbcnotesValidatedUrl = function(baseurl) {
-    //     var a = document.createElement('a');
-    //     a.href = baseurl;
-    //     return (a.search.length > 0) ? baseurl : baseurl + '?';
-    // };
+    let panel = null;
+    let initNotes = null;
+    let strDeleteNote = M.util.get_string('deletejbcnotes', 'block_jbcnotes');
 
     var jbcnotes = {
         /** @alias module:blocks/jbcnotes */
 
-        getJbcnotesValidatedUrl: function (baseurl) {
-            var a = document.createElement('a');
+        getJbcNotesValidatedUrl: function(baseurl) {
+            const a = document.createElement('a');
             a.href = baseurl;
             return (a.search.length > 0) ? baseurl : baseurl + '?';
         },
         /*
          * Validation for textarea input text
          */
-        getWarnings: function (status) {
-            if (status == false) {
+        getWarnings: function(status) {
+            if (status === false) {
                 $('#addmynote-label-' + CONFIG.instanceid + '  span.warning').html(CONFIG.maxallowedcharacters_warning);
             } else {
-                var ta = $('#id_mynotecontent-' + CONFIG.instanceid);
-                if (ta.val() == '') {
+                const ta = $('#id_mynotecontent-' + CONFIG.instanceid);
+                if (ta.val() === '') {
                     $('#addmynote-label-' + CONFIG.instanceid + '  span.warning').html('');
                 } else {
                     var cl = CONFIG.maxallowedcharacters - ta.val().length;
@@ -72,8 +70,8 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                 }
             }
         },
-        checkInputText: function () {
-            var ta = $('#id_mynotecontent-' + CONFIG.instanceid);
+        checkInputText: function() {
+            const ta = $('#id_mynotecontent-' + CONFIG.instanceid);
             if (ta.val().length <= CONFIG.maxallowedcharacters) {
                 $('#addmynote_submit').removeAttr('disabled', '');
                 return true;
@@ -81,31 +79,31 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                 $('#addmynote_submit').attr('disabled', 'disabled');
                 return false;
             }
-            return true;
         },
-        toggle_textarea: function (e) {
-            var ta = $('#id_mynotecontent-' + CONFIG.instanceid);
+        toggleTextarea: function(e) {
+            const noteTextarea = $('#id_mynotecontent-' + CONFIG.instanceid);
 
-            if (!ta) {
+            if (!noteTextarea) {
                 return false;
             }
-            var focus = (e.type == 'focusin');
+            const focus = (e.type === 'focusin');
             if (focus) {
-                if (ta.val() == M.util.get_string('placeholdercontent', 'block_jbcnotes')) {
-                    ta.val('');
+                if (noteTextarea.val() === M.util.get_string('placeholdercontent', 'block_jbcnotes')) {
+                    noteTextarea.val('');
                     $('.textarea').css('border-color', 'black');
                 }
             } else {
-                if (ta.val() == '') {
-                    ta.val(M.util.get_string('placeholdercontent', 'block_jbcnotes'));
+                if (noteTextarea.val() === '') {
+                    noteTextarea.val(M.util.get_string('placeholdercontent', 'block_jbcnotes'));
                     $('.textarea').css('border-color', 'gray');
                     $('#addmynote-label-' + CONFIG.instanceid + '  span.warning').html('');
                 }
             }
+            return true;
         },
-        request: function (args) {
-            var params = {};
-            var scope = this;
+        request: function(args) {
+            const params = {};
+            let scope = this;
             if (args.scope) {
                 scope = args.scope;
             }
@@ -121,26 +119,33 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             var cfg = {
                 method: 'POST',
                 on: {
-                    start: function () {
-                        // '<div class="mdl-align"><img src="'+M.util.image_url('i/loading', 'core')+'" /></div>';
+                    start: function() {
                     },
-                    complete: function (id, o, p) {
-                        if (!o) {
-                            alert('IO FATAL');
+                    complete: function(id, resp, p) {
+                        let result;
+                        if (!resp) {
                             return false;
                         }
-                        var data = Y.JSON.parse(o.responseText);
+                        var data = Y.JSON.parse(resp.responseText);
                         if (data.error) {
-                            if (data.error == 'require_login') {
+                            if (data.error === 'require_login') {
                                 args.callback(id, data, p);
-                                return true;
+                                result = true;
+                            } else {
+                                const message = 'There was an error retrieving your notes. ' +
+                                    'Please try again. If the problem persists, contact support.';
+                                notification.alert('Error', message);
+                                result = false;
                             }
-                            alert(data.error);
-                            return false;
                         } else {
                             args.callback(id, data, p);
-                            return true;
+                            result = true;
                         }
+
+                        return result;
+                    },
+                    failure: function() {
+                        notification.alert('Error', M.util.get_string('ajaxerror', 'block_jbcnotes', null));
                     }
                 },
                 arguments: {
@@ -156,15 +161,15 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             }
             Y.io(this.api, cfg);
         },
-        saveJbcnotes: function (e) {
+        saveJbcnotes: function(e) {
             e.preventDefault();
             var scope = this;
 
-            if (scope.checkInputText() == false) {
+            if (scope.checkInputText() === false) {
                 return false;
             }
             var ta = $('#id_mynotecontent-' + CONFIG.instanceid);
-            if (ta.val() == "" || ta.val() == M.util.get_string('placeholdercontent', 'block_jbcnotes')) {
+            if (ta.val() === '' || ta.val() === M.util.get_string('placeholdercontent', 'block_jbcnotes')) {
                 return false;
             }
             var arg = {
@@ -181,7 +186,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             });
             this.request({
                     params: arg,
-                    callback: function (id, ret) {
+                    callback: function(id, ret) {
                         if (!ret.notes) {
                             return false;
                         }
@@ -205,8 +210,9 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                     }
                 }
             );
+            return true;
         },
-        addToList: function (notesobj, action = '') {
+        addToList: function(notesobj, action = '') {
 
             /**
              * Sort custom callback
@@ -229,7 +235,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             }
             $(SELECTORS.JBCNOTES_BASE).find(scope.currenttab).attr('notes-count', notesobj.count);
         },
-        getJbcnotes: function (page = 0) {
+        getJbcnotes: function(page = 0) {
             var scope = this;
             page = parseInt(page);
             var el = $(SELECTORS.JBCNOTES_BASE).find(scope.currenttab + '-list');
@@ -246,13 +252,13 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             };
             this.request({
                 params: arg,
-                callback: function (id, ret) {
+                callback: function(id, ret) {
                     scope.addToList(ret);
                     scope.displayJbcnotes();
                 }
             });
         },
-        updateJbcnotesInfo: function (jbcnotescount, page) {
+        updateJbcnotesInfo: function(jbcnotescount, page) {
             page = parseInt(page);
             jbcnotescount = parseInt(jbcnotescount);
             var scope = this;
@@ -295,7 +301,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
         /*
          * Render notes as html ul li element
          */
-        renderJbcnotes: function (notes) {
+        renderJbcnotes: function(notes) {
             if (notes.length < 1) {
                 return false;
             }
@@ -304,7 +310,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             for (x in notes) {
                 $('#mynote-' + CONFIG.instanceid + '-' + notes[x].id).remove();
                 var deletelink = '<a href="#" id="mynote-delete-' + CONFIG.instanceid + '-' + notes[x].id
-                    + '" class="mynote-delete" title="' + strdeletenote + '">' + NODES.DELETE_ICON + '</a>';
+                    + '" class="mynote-delete" title="' + strDeleteNote + '">' + NODES.DELETE_ICON + '</a>';
                 var notedetail = '';
                 if (notes[x].modlink) {
                     notedetail = '<div class="note-detail">' + notes[x].modlink + ' - ' + '</div>';
@@ -318,11 +324,11 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             }
             return lists;
         },
-        createLink: function (page, text, classname) {
+        createLink: function(page, text, classname) {
             var classattribute = (typeof (classname) != 'undefined') ? ' class="' + classname + '"' : '';
             return '<a href="' + this.api + '&page=' + page + '"' + classattribute + '>' + text + '</a>';
         },
-        displayJbcnotes: function () {
+        displayJbcnotes: function() {
             var scope = this;
             var page = parseInt($(SELECTORS.JBCNOTES_BASE).find(scope.currenttab).attr('onpage'));
             var jbcnotescount = parseInt($(SELECTORS.JBCNOTES_BASE).find(scope.currenttab).attr('notes-count'));
@@ -336,7 +342,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             var upperlimit = page * CONFIG.perpage + CONFIG.perpage;
             var lowerlimit = page * CONFIG.perpage;
             el.find('li').css('display', 'none');
-            el.find('li').each(function (i, el) {
+            el.find('li').each(function(i, el) {
                 if (i >= lowerlimit && i < upperlimit) {
                     $(el).css('display', 'block');
                 }
@@ -344,17 +350,18 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
             scope.updateJbcnotesInfo(jbcnotescount, page);
             // Panel.centerDialogue();
         },
-        registerActions: function () {
+        registerActions: function() {
             var scope = this;
+            const body = $('body');
 
-            $('body').delegate('#addmynote_cancel', 'click', function () {
+            body.on('click', '#addmynote_cancel', function() {
                 panel.hide();
             });
-            $('body').delegate('#addmynote_submit', 'click', function (e) {
+            body.on('click', '#addmynote_submit', function(e) {
                 scope.saveJbcnotes(e);
             });
 
-            $('body').delegate(SELECTORS.JBCNOTES_BASE + ' ul.tabs-menu li', 'click', function () {
+            body.on('click', SELECTORS.JBCNOTES_BASE + ' ul.tabs-menu li', function() {
                 $(this).addClass("current");
                 $(this).siblings().removeClass("current");
                 var tab = $(this).attr("id").replace('tab-', '');
@@ -369,14 +376,14 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                 }
             });
 
-            $('body').delegate('#id_mynotecontent-' + CONFIG.instanceid, 'focus blur', function (e) {
-                scope.toggle_textarea(e);
+            body.on('focus blur', '#id_mynotecontent-' + CONFIG.instanceid, function(e) {
+                scope.toggleTextarea(e);
             });
-            $('body').delegate('#id_mynotecontent-' + CONFIG.instanceid, 'change keypress keyup', function () {
+            body.on('change keypress keyup', '#id_mynotecontent-' + CONFIG.instanceid, function() {
                 scope.getWarnings(scope.checkInputText());
             });
 
-            $('body').delegate(SELECTORS.JBCNOTES_BASE + ' .jbcnotes-paging .paging a', 'click', function (e) {
+            body.on('click', SELECTORS.JBCNOTES_BASE + ' .jbcnotes-paging .paging a', function(e) {
                 e.preventDefault();
                 var regex = new RegExp(/[\?&]page=(\d+)/);
                 var results = regex.exec($(this).attr('href'));
@@ -387,13 +394,13 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                 $(SELECTORS.JBCNOTES_BASE).find(scope.currenttab).attr('onpage', parseInt(page));
                 scope.getJbcnotes(page);
             });
-            $('body').delegate(SELECTORS.JBCNOTES_BASE + ' a.mynote-delete', 'click', function (e) {
+            body.on('click', SELECTORS.JBCNOTES_BASE + ' a.mynote-delete', function(e) {
                 e.preventDefault();
-                var nid = $(this).attr('id');
-                if (nid != '' || nid != 'undefined') {
+                const noteId = $(this).attr('id');
+                if (noteId !== '' || noteId !== undefined) {
                     var notescount = $(SELECTORS.JBCNOTES_BASE)
                         .find(SELECTORS.JBCNOTES_LISTS + '-' + scope.currenttab + ' > li').length;
-                    var id = nid.replace('mynote-delete-' + CONFIG.instanceid + '-', '');
+                    var id = noteId.replace('mynote-delete-' + CONFIG.instanceid + '-', '');
                     var arg = {
                         contextid: CONFIG.contextid,
                         action: 'delete',
@@ -402,7 +409,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                     };
                     scope.request({
                         params: arg,
-                        callback: function (id, ret, args) {
+                        callback: function(id, ret, args) {
                             args.scope.addToList(ret);
                             $('#mynote-' + CONFIG.instanceid + '-' + ret.noteid).remove();
                             args.scope.displayJbcnotes();
@@ -411,7 +418,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                 }
             });
         },
-        displayDialogue: function () {
+        displayDialogue: function() {
             var scope = jbcnotes;
             if (panel === null) {
                 str.get_strings([
@@ -425,7 +432,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                         param: CONFIG.contextareas[scope.currenttabindex]
                     },
                     {key: 'placeholdercontent', component: 'block_jbcnotes'}
-                ]).done(function (s) {
+                ]).done(function(s) {
                     // Create basic tab structure
                     var el = $('<div></div>').append($('<div id="' +
                         CSS.JBCNOTES_BASE +
@@ -490,7 +497,7 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                     }
                     el.find('.tabs-menu').append(tabsmenu);
                     el.find('.tab').append($(tabcontents));
-                    Y.use('moodle-core-notification-dialogue', function () {
+                    Y.use('moodle-core-notification-dialogue', function() {
                         panel = new M.core.dialogue({
                             draggable: true,
                             modal: true,
@@ -498,9 +505,11 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
                             headerContent: M.util.get_string('jbcnotes', 'block_jbcnotes'),
                             responsive: true,
                         });
+                        panel.set('width', '70%');
+                        panel.set('centered', true);
                         panel.set('bodyContent', el.html());
-                        if (initnotes === null) {
-                            initnotes = true;
+                        if (initNotes === null) {
+                            initNotes = true;
                             // Get initial notes
                             scope.getJbcnotes(0);
                             $(SELECTORS.JBCNOTES_BASE).find(scope.currenttab).attr('data-loaded', "true");
@@ -518,24 +527,28 @@ define(['jquery', 'core/yui', 'core/str', 'core/config', 'core/notification'], f
         /**
          * Initialize jbcnotes
          * @access public
-         * @param {int} instanceid
-         * @param {int} contextid
-         * @param {int} maxallowedcharacters
-         * @param {int} perpage
-         * @param {string} editingicon_pos
-         * @param {bool} editing
-         * @param {string} adminurl
-         * @param {array} contextareas
-         * @param {string} currenttabindex
+         * @param {object} args
          */
-        init: function (args) {
+        init: function(args) {
+            /* Definition:
+             * args:
+             * {int} instanceid
+             * {int} contextid
+             * {int} maxallowedcharacters
+             * {int} perpage
+             * {string} editingicon_pos
+             * {bool} editing
+             * {string} adminurl
+             * {array} contextareas
+             * {string} currenttabindex
+             */
             CONFIG = args;
             CONFIG.prefix = 'jbcnotes_';
             this.perpage = parseInt(CONFIG.perpage);
             this.currenttab = '#jbcnotes_' + args.currenttabindex;
             this.defaulttab = '#jbcnotes_' + args.currenttabindex;
             this.currenttabindex = args.currenttabindex;
-            this.api = this.getJbcnotesValidatedUrl(M.cfg.wwwroot + '/blocks/jbcnotes/jbcnotes_ajax.php');
+            this.api = this.getJbcNotesValidatedUrl(M.cfg.wwwroot + '/blocks/jbcnotes/jbcnotes_ajax.php');
 
             var strtitle = M.util.get_string('showjbcnotes', 'block_jbcnotes');
             if (!CONFIG.editing) {
