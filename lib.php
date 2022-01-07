@@ -80,16 +80,15 @@ class block_jbcnotes_manager  {
             $c = new stdClass();
             $c->id = $u->mynoteid;
             $c->userid = $u->id;
+            $c->courselink = '';
+            $c->modlink = '';
             if ($u->courseid != SITEID) {
                 $c->courselink = html_writer::link(course_get_url($u->courseid), $u->coursename);
                 if ($u->contextarea === 'mod') {
-                    list(, , $cm) = get_context_info_array($u->contextid);
-                    $cm_info = get_fast_modinfo($cm->id)->get_cm($cm->id);
+                    list(, $course, $cm) = get_context_info_array($u->contextid);
+                    $cm_info = get_fast_modinfo($course)->get_cm($cm->id);
                     $c->modlink = html_writer::link($cm_info->url, $cm_info->name);
                 }
-            } else {
-                $c->courselink = '';
-                $c->modlink = '';
             }
 
             $c->content = $u->ccontent;
